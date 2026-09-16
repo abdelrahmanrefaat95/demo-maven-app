@@ -5,7 +5,7 @@ A deliberately small Spring Boot application used as the running example in a fi
 ## Build and run
 
 ```sh
-mvn clean package
+./mvnw clean package
 java -jar target/*.jar
 ```
 
@@ -16,9 +16,9 @@ SPRING_PROFILES_ACTIVE=staging java -jar target/*.jar
 APP_COLOR='#8b5cf6' java -jar target/*.jar
 ```
 
-`application.yml` supplies defaults, `APP_COLOR` overrides them, and `--app.color=...` has the highest standard Spring precedence. Use `mvn clean package -Pfast` to skip tests for a build-speed demonstration.
+`application.yml` supplies defaults, `APP_COLOR` overrides them, and `--app.color=...` has the highest standard Spring precedence. Use `./mvnw clean package -Pfast` to skip tests for a build-speed demonstration.
 
-To release a new version, change the `<version>` in `pom.xml` and run `mvn clean package`; the new version, build time, and Git short SHA are embedded in the jar. The SHA is blank only when the source is built outside a Git checkout. The same jar produces every environment on purpose: only runtime configuration changes the environment and color.
+To release a new version, change the `<version>` in `pom.xml` and run `./mvnw clean package`; the new version, build time, and Git short SHA are embedded in the jar. The build timestamp intentionally changes on every build (`project.build.outputTimestamp` is not configured). The SHA is blank only when the source is built outside a Git checkout. The same jar produces every environment on purpose: only runtime configuration changes the environment and color.
 
 | Environment variable | Default | Purpose |
 | --- | --- | --- |
@@ -31,4 +31,4 @@ To release a new version, change the `<version>` in `pom.xml` and run `mvn clean
 | `DB_PASSWORD` | `postgres` | PostgreSQL password (`postgres` profile) |
 | `HOSTNAME` | machine hostname | Hostname displayed by the page |
 
-The default is an in-memory H2 database with a Flyway migration. Enable the `postgres` profile when a PostgreSQL service is available.
+The default is an in-memory H2 database with a Flyway migration. Enable the `postgres` profile when a PostgreSQL service is available. On the `postgres` profile, the application exits at startup if PostgreSQL is unreachable because Flyway runs during boot; no retry workaround is used. After startup, readiness becomes `DOWN` only if the database connection is lost, while liveness remains independent of the database.

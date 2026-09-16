@@ -1,34 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.3.5</version></parent>
-  <groupId>com.example</groupId><artifactId>devops-demo</artifactId><version>1.0.0</version><name>DevOps Demo</name>
-  <properties><java.version>17</java.version><maven.surefire.version>3.5.2</maven.surefire.version><maven.failsafe.version>3.5.2</maven.failsafe.version><jacoco.version>0.8.12</jacoco.version><git-commit-id.version>6.0.0</git-commit-id.version><cyclonedx.version>2.9.1</cyclonedx.version><commons-text.version>1.9</commons-text.version></properties>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.1.1</version>
+  </parent>
+
+  <groupId>com.example</groupId>
+  <artifactId>devops-demo</artifactId>
+  <version>1.0.0</version>
+  <name>DevOps Demo</name>
+
+  <properties>
+    <java.version>17</java.version>
+    <!-- Deliberately pinned for the vulnerability-scanning lesson; Boot does not manage it. -->
+    <commons-text.version>1.9</commons-text.version>
+    <!-- Boot does not manage JaCoCo; this version supports the local JDK used for reports. -->
+    <jacoco.version>0.8.14</jacoco.version>
+  </properties>
+
   <dependencies>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-thymeleaf</artifactId></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>
     <dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>
-    <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-core</artifactId></dependency>
+    <!-- Boot 4's dedicated starter supplies Flyway auto-configuration. -->
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-flyway</artifactId></dependency>
     <dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>runtime</scope></dependency>
     <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId><scope>runtime</scope></dependency>
-    <!-- Intentionally vulnerable for the vulnerability-scanning lesson only (CVE-2022-42889). Never copy this into a real project; fix by upgrading this one version. -->
+    <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-database-postgresql</artifactId><scope>runtime</scope></dependency>
+    <!-- WARNING: Intentionally vulnerable for the vulnerability-scanning lesson only: CVE-2022-42889. Fixed in 1.10.0; never copy this dependency into a real project. -->
     <dependency><groupId>org.apache.commons</groupId><artifactId>commons-text</artifactId><version>${commons-text.version}</version></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
   </dependencies>
-  <build><plugins>
-    <plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId><executions><execution><id>build-info</id><goals><goal>build-info</goal></goals><configuration><additionalProperties><gitSha>${git.commit.id.abbrev}</gitSha></additionalProperties></configuration></execution></executions></plugin>
-    <plugin><groupId>io.github.git-commit-id</groupId><artifactId>git-commit-id-maven-plugin</artifactId><version>${git-commit-id.version}</version><configuration><failOnNoGitDirectory>false</failOnNoGitDirectory><generateGitPropertiesFile>false</generateGitPropertiesFile></configuration><executions><execution><id>git-info</id><phase>initialize</phase><goals><goal>revision</goal></goals></execution></executions></plugin>
-    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>${maven.surefire.version}</version></plugin>
-    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-failsafe-plugin</artifactId><version>${maven.failsafe.version}</version><executions><execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution></executions></plugin>
-    <plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId><version>${jacoco.version}</version><executions><execution><goals><goal>prepare-agent</goal></goals></execution><execution><id>report</id><phase>verify</phase><goals><goal>report</goal></goals></execution></executions></plugin>
-    <plugin><groupId>org.cyclonedx</groupId><artifactId>cyclonedx-maven-plugin</artifactId><version>${cyclonedx.version}</version><executions><execution><phase>package</phase><goals><goal>makeBom</goal></goals></execution></executions></plugin>
-  </plugins></build>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build-info</id>
+            <goals><goal>build-info</goal></goals>
+            <configuration><additionalProperties><gitSha>${git.commit.id.abbrev}</gitSha></additionalProperties></configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
+        <configuration>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+        </configuration>
+        <executions><execution><id>git-info</id><phase>initialize</phase><goals><goal>revision</goal></goals></execution></executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions><execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution></executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution><goals><goal>prepare-agent</goal></goals></execution>
+          <execution><id>report</id><phase>verify</phase><goals><goal>report</goal></goals></execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <executions><execution><phase>package</phase><goals><goal>makeBom</goal></goals></execution></executions>
+      </plugin>
+    </plugins>
+  </build>
+
   <profiles>
     <!-- Builds copied without Git still work; the app displays an empty SHA. -->
-    <profile><id>no-git</id><activation><file><missing>.git</missing></file></activation><properties><git.commit.id.abbrev>unavailable</git.commit.id.abbrev></properties></profile>
+    <profile>
+      <id>no-git</id>
+      <activation><file><missing>.git</missing></file></activation>
+      <properties><git.commit.id.abbrev>unavailable</git.commit.id.abbrev></properties>
+    </profile>
     <profile><id>fast</id><properties><skipTests>true</skipTests><skipITs>true</skipITs></properties></profile>
   </profiles>
 </project>
