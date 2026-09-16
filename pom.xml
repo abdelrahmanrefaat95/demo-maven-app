@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.3.5</version></parent>
   <groupId>com.example</groupId><artifactId>devops-demo</artifactId><version>1.0.0</version><name>DevOps Demo</name>
-  <properties><java.version>17</java.version><git.commit.id.abbrev>unavailable</git.commit.id.abbrev><maven.surefire.version>3.5.2</maven.surefire.version><maven.failsafe.version>3.5.2</maven.failsafe.version><jacoco.version>0.8.12</jacoco.version><git-commit-id.version>6.0.0</git-commit-id.version><cyclonedx.version>2.9.1</cyclonedx.version><commons-text.version>1.9</commons-text.version></properties>
+  <properties><java.version>17</java.version><maven.surefire.version>3.5.2</maven.surefire.version><maven.failsafe.version>3.5.2</maven.failsafe.version><jacoco.version>0.8.12</jacoco.version><git-commit-id.version>6.0.0</git-commit-id.version><cyclonedx.version>2.9.1</cyclonedx.version><commons-text.version>1.9</commons-text.version></properties>
   <dependencies>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-thymeleaf</artifactId></dependency>
@@ -26,5 +26,9 @@
     <plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId><version>${jacoco.version}</version><executions><execution><goals><goal>prepare-agent</goal></goals></execution><execution><id>report</id><phase>verify</phase><goals><goal>report</goal></goals></execution></executions></plugin>
     <plugin><groupId>org.cyclonedx</groupId><artifactId>cyclonedx-maven-plugin</artifactId><version>${cyclonedx.version}</version><executions><execution><phase>package</phase><goals><goal>makeBom</goal></goals></execution></executions></plugin>
   </plugins></build>
-  <profiles><profile><id>fast</id><properties><skipTests>true</skipTests><skipITs>true</skipITs></properties></profile></profiles>
+  <profiles>
+    <!-- Builds copied without Git still work; the app displays an empty SHA. -->
+    <profile><id>no-git</id><activation><file><missing>.git</missing></file></activation><properties><git.commit.id.abbrev>unavailable</git.commit.id.abbrev></properties></profile>
+    <profile><id>fast</id><properties><skipTests>true</skipTests><skipITs>true</skipITs></properties></profile>
+  </profiles>
 </project>

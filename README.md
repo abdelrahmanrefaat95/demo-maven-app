@@ -13,12 +13,12 @@ Select an environment profile or override its color directly:
 
 ```sh
 SPRING_PROFILES_ACTIVE=staging java -jar target/*.jar
-APP_COLOR=#8b5cf6 java -jar target/*.jar
+APP_COLOR='#8b5cf6' java -jar target/*.jar
 ```
 
 `application.yml` supplies defaults, `APP_COLOR` overrides them, and `--app.color=...` has the highest standard Spring precedence. Use `mvn clean package -Pfast` to skip tests for a build-speed demonstration.
 
-To release a new version, change the `<version>` in `pom.xml` and run `mvn clean package`; the new version and build time are embedded in the jar. The same jar produces every environment on purpose: only runtime configuration changes the environment and color.
+To release a new version, change the `<version>` in `pom.xml` and run `mvn clean package`; the new version, build time, and Git short SHA are embedded in the jar. The SHA is blank only when the source is built outside a Git checkout. The same jar produces every environment on purpose: only runtime configuration changes the environment and color.
 
 | Environment variable | Default | Purpose |
 | --- | --- | --- |
