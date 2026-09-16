@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DevOps Demo</title>
+<style>body{margin:0;min-height:100vh;color:white;font-family:system-ui,sans-serif;display:grid;place-items:center;text-align:center;text-shadow:0 2px 5px #0008}.card{padding:3rem;max-width:850px}.environment{font-size:clamp(4rem,15vw,10rem);font-weight:900;letter-spacing:.08em}.hostname{font-size:clamp(2rem,7vw,5rem);font-weight:800;margin:1.5rem 0}dl{font-size:1.15rem;display:grid;grid-template-columns:auto auto;gap:.45rem 1.2rem;justify-content:center}dt{font-weight:700}</style></head>
+<body th:style="|background: ${color};|"><main class="card"><div class="environment" th:text="${#strings.toUpperCase(environment)}">LOCAL</div><p>Response served by</p><div class="hostname" th:text="${hostname}">hostname</div><dl><dt>Version</dt><dd th:text="${version}">1.0.0</dd><dt>Build time</dt><dd th:text="${buildTime}">time</dd><dt>Git SHA</dt><dd th:text="${gitSha}">sha</dd><dt>Requests on this instance</dt><dd th:text="${requests}">1</dd></dl></main></body></html>
