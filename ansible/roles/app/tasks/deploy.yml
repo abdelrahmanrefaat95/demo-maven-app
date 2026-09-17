@@ -1,0 +1,50 @@
+---
+- name: Check that the jar has been built
+  ansible.builtin.stat:
+    path: "{{ app_jar_local }}"
+  register: app_jar_build
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Stop if the jar is missing
+  ansible.builtin.assert:
+    that: app_jar_build.stat.exists
+    fail_msg: "{{ app_jar_local }} not found. Run ./mvnw clean package in the repo first."
+    quiet: true
+  run_once: true
+
+- name: Copy the jar to the host
+  ansible.builtin.copy:
+    src: "{{ app_jar_local }}"
+    dest: "{{ app_home }}/app.jar"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0644"
+  notify: Restart app
+
+- name: Apply pending restarts now
+  ansible.builtin.meta: flush_handlers
+
+- name: Make sure the service is running
+  ansible.builtin.systemd_service:
+    name: devops-demo
+    state: started
+    enabled: true
+
+- name: Wait until the app reports ready
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ app_port }}/actuator/health/readiness"
+  register: app_ready
+  until: app_ready.status == 200
+  retries: 12
+  delay: 5
+
+- name: Read what the app is serving
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ app_port }}/api/info"
+  register: app_info
+
+- name: Report the deployed build
+  ansible.builtin.debug:
+    msg: "{{ inventory_hostname }} serves {{ app_info.json.environment }} version {{ app_info.json.version }}"

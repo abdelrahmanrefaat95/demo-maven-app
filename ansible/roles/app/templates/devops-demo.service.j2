@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+[Unit]
+Description=DevOps demo Spring Boot app
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists={{ app_home }}/app.jar
+
+[Service]
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ app_home }}
+EnvironmentFile={{ app_config_dir }}/app.env
+ExecStart=/usr/bin/java -jar {{ app_home }}/app.jar
+SuccessExitStatus=143
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

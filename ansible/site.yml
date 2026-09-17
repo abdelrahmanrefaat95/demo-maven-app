@@ -1,0 +1,7 @@
+---
+- name: Prepare and deploy the capstone app
+  hosts: app_servers
+  become: true
+  serial: 1
+  roles:
+    - app

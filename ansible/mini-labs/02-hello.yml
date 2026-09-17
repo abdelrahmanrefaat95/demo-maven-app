@@ -1,0 +1,13 @@
+---
+- name: Mini lab 2 - first playbook
+  hosts: app_servers
+  tasks:
+    - name: Show who and where we are
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} runs {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+
+    - name: Write a greeting file
+      ansible.builtin.copy:
+        dest: /tmp/hello.txt
+        content: "Hello from Ansible on {{ inventory_hostname }}\n"
+        mode: "0644"

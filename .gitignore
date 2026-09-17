@@ -6,3 +6,4 @@ target/
 .settings/
 .env
 *.log
+ansible/group_vars/app_servers/vault.yml

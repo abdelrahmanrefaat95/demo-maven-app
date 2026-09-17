@@ -1,0 +1,8 @@
+---
+app_user: devops-demo
+app_home: /opt/devops-demo
+app_config_dir: /etc/devops-demo
+app_port: 8080
+app_java_package: openjdk-17-jre-headless
+app_version: "1.0.0"
+app_jar_local: "{{ playbook_dir }}/../target/devops-demo-{{ app_version }}.jar"

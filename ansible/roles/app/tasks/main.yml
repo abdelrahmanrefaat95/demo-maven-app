@@ -1,0 +1,8 @@
+---
+- name: Prepare the host
+  ansible.builtin.import_tasks: prepare.yml
+  tags: prepare
+
+- name: Deploy the application
+  ansible.builtin.import_tasks: deploy.yml
+  tags: deploy

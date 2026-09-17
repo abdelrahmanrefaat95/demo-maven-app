@@ -52,3 +52,37 @@ To release a new version, change the `<version>` in `pom.xml` and run `./mvnw cl
 | `HOSTNAME` | machine hostname | Hostname displayed by the page |
 
 The default is an in-memory H2 database with a Flyway migration. Enable the `postgres` profile when a PostgreSQL service is available. On the `postgres` profile, the application exits at startup if PostgreSQL is unreachable because Flyway runs during boot; no retry workaround is used. After startup, readiness becomes `DOWN` only if the database connection is lost, while liveness remains independent of the database.
+
+## Ansible (Module 4)
+
+Run the mini labs from the `ansible/` directory:
+
+```sh
+cd ansible
+ansible-playbook mini-labs/02-hello.yml
+ansible-playbook mini-labs/03-vars-loops.yml
+ansible-playbook mini-labs/04-template-handler.yml
+ansible-playbook mini-labs/05-cleanup.yml
+```
+
+The main playbook prepares the hosts with `--tags prepare` and deploys the jar built by `./mvnw clean package` with `--tags deploy`:
+
+```sh
+./mvnw clean package
+cd ansible
+ansible-playbook site.yml --tags prepare
+ansible-playbook site.yml --tags deploy
+```
+
+Create the encrypted vault from the example file:
+
+```sh
+cp vault.yml.example group_vars/app_servers/vault.yml
+ansible-vault encrypt group_vars/app_servers/vault.yml
+```
+
+Deploy another application version by overriding `app_version`:
+
+```sh
+ansible-playbook site.yml --tags deploy -e app_version=X.Y.Z
+```
