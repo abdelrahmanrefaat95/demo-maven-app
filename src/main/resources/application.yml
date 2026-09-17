@@ -25,4 +25,4 @@ management:
           include: livenessState
 app:
   environment: local
-  color: slate
+  color: "#475569"
