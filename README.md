@@ -18,6 +18,26 @@ APP_COLOR='#8b5cf6' java -jar target/*.jar
 
 `application.yml` supplies defaults, `APP_COLOR` overrides them, and `--app.color=...` has the highest standard Spring precedence. Use `./mvnw clean package -Pfast` to skip tests for a build-speed demonstration.
 
+## Change a color and push the code
+
+For a committed configuration change, edit `app.color` in `src/main/resources/application.yml` for the default color, or in a profile file such as `src/main/resources/application-staging.yml`. Hex colors must be quoted in YAML:
+
+```yaml
+app:
+  color: "#8b5cf6"
+```
+
+Build and check the change locally, then commit and push it to GitHub:
+
+```sh
+./mvnw clean verify
+git add src/main/resources/application.yml
+git commit -m "Change default page color"
+git push
+```
+
+Changing YAML is a configuration commit; it does not change application Java code. To demonstrate a runtime-only change without a commit or rebuild, use `APP_COLOR='#8b5cf6' java -jar target/*.jar` instead.
+
 To release a new version, change the `<version>` in `pom.xml` and run `./mvnw clean package`; the new version, build time, and Git short SHA are embedded in the jar. The build timestamp intentionally changes on every build (`project.build.outputTimestamp` is not configured). The SHA is blank only when the source is built outside a Git checkout. The same jar produces every environment on purpose: only runtime configuration changes the environment and color.
 
 | Environment variable | Default | Purpose |
