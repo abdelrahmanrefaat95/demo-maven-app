@@ -65,24 +65,33 @@ ansible-playbook mini-labs/04-template-handler.yml
 ansible-playbook mini-labs/05-cleanup.yml
 ```
 
-The main playbook prepares the hosts with `--tags prepare` and deploys the jar built by `./mvnw clean package` with `--tags deploy`:
+The main playbook prepares the hosts with `--tags prepare` and deploys the jar built by `./mvnw clean package` with `--tags deploy`. Every `site.yml` command must include `--ask-vault-pass` because the playbook loads the encrypted vault with `vars_files`:
 
 ```sh
 ./mvnw clean package
 cd ansible
-ansible-playbook site.yml --tags prepare
-ansible-playbook site.yml --tags deploy
+ansible-playbook site.yml --ask-vault-pass --tags prepare
+ansible-playbook site.yml --ask-vault-pass --tags deploy
+```
+
+Before creating the vault file, validate the Ansible configuration:
+
+```sh
+ansible-lint
+ansible-playbook site.yml --syntax-check
 ```
 
 Create the encrypted vault from the example file:
 
 ```sh
-cp vault.yml.example group_vars/app_servers/vault.yml
-ansible-vault encrypt group_vars/app_servers/vault.yml
+cp vault/secrets.yml.example vault/secrets.yml
+ansible-vault encrypt vault/secrets.yml
 ```
+
+The mini labs and ad-hoc Ansible commands do not need `--ask-vault-pass`.
 
 Deploy another application version by overriding `app_version`:
 
 ```sh
-ansible-playbook site.yml --tags deploy -e app_version=X.Y.Z
+ansible-playbook site.yml --ask-vault-pass --tags deploy -e app_version=X.Y.Z
 ```

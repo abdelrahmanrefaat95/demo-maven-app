@@ -3,5 +3,7 @@
   hosts: app_servers
   become: true
   serial: 1
+  vars_files:
+    - vault/secrets.yml
   roles:
     - app

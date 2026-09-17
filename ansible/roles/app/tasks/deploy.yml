@@ -37,7 +37,7 @@
     url: "http://127.0.0.1:{{ app_port }}/actuator/health/readiness"
   register: app_ready
   until: app_ready.status == 200
-  retries: 12
+  retries: 24
   delay: 5
 
 - name: Read what the app is serving
