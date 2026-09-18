@@ -53,6 +53,25 @@ To release a new version, change the `<version>` in `pom.xml` and run `./mvnw cl
 
 The default is an in-memory H2 database with a Flyway migration. Enable the `postgres` profile when a PostgreSQL service is available. On the `postgres` profile, the application exits at startup if PostgreSQL is unreachable because Flyway runs during boot; no retry workaround is used. After startup, readiness becomes `DOWN` only if the database connection is lost, while liveness remains independent of the database.
 
+## Docker (Modules 5 and 6)
+
+Build the application image and run the staging profile:
+
+```sh
+docker build -t devops-demo:1.0.0 .
+docker run -d --name devops-demo -p 8080:8080 -e SPRING_PROFILES_ACTIVE=staging devops-demo:1.0.0
+```
+
+Start the full application and PostgreSQL stack:
+
+```sh
+cp .env.example .env && docker compose up -d --build
+curl -s localhost:8080/api/info
+docker compose ps
+```
+
+Stop the stack with `docker compose down`. Add `-v` (`docker compose down -v`) to also delete the PostgreSQL database volume. PostgreSQL is pinned to version 17 on purpose because the PostgreSQL 18 image moved its volume path.
+
 ## Ansible (Module 4)
 
 Run the mini labs from the `ansible/` directory:
