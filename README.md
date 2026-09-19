@@ -97,6 +97,30 @@ Reach the application at `http://NODE_ADDRESS:30080/api/info`.
 
 The Kubernetes Secret is base64-encoded, not encrypted, and exists only as a teaching example.
 
+Install metrics-server for the autoscaling lab. On kind it needs the insecure kubelet TLS argument:
+
+```sh
+helm install metrics-server metrics-server/metrics-server \
+  --namespace kube-system \
+  --set args={--kubelet-insecure-tls}
+```
+
+In Lab C, apply the HPA, quota, and read-only RBAC resources:
+
+```sh
+kubectl apply -f k8s/09-hpa.yaml
+kubectl apply -f k8s/10-resourcequota.yaml
+kubectl apply -f k8s/11-rbac-readonly.yaml
+```
+
+Render the Helm chart locally, or load the image and install the chart in its own namespace:
+
+```sh
+helm template demo charts/devops-demo
+kind load docker-image devops-demo:1.0.0 --name devops-course
+helm install demo charts/devops-demo -n helm-demo --create-namespace
+```
+
 Delete the Kubernetes resources and cluster when finished:
 
 ```sh
