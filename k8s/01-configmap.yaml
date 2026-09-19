@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: devops-demo
+data:
+  SPRING_PROFILES_ACTIVE: "dev,postgres"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "devops_demo"
+  DB_USER: "demo"

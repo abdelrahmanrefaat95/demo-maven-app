@@ -72,6 +72,38 @@ docker compose ps
 
 Stop the stack with `docker compose down`. Add `-v` (`docker compose down -v`) to also delete the PostgreSQL database volume. PostgreSQL is pinned to version 17 on purpose: PostgreSQL 18 moved `PGDATA` to `/var/lib/postgresql/18/docker` and its volume to `/var/lib/postgresql`, which breaks a stack that mounts the older `/var/lib/postgresql/data` path.
 
+## Kubernetes (Module 6)
+
+Create the local kind cluster, then build and load the application image:
+
+```sh
+kind create cluster --config k8s/kind-cluster.yaml
+docker build -t devops-demo:1.0.0 .
+kind load docker-image devops-demo:1.0.0 --name devops-course
+```
+
+Apply the namespace, configuration, database, application deployment, and service in order:
+
+```sh
+kubectl apply -f k8s/00-namespace.yaml
+kubectl apply -f k8s/01-configmap.yaml
+kubectl apply -f k8s/02-secret.yaml
+kubectl apply -f k8s/03-postgres.yaml
+kubectl apply -f k8s/04-app-deployment.yaml
+kubectl apply -f k8s/05-app-service.yaml
+```
+
+Reach the application at `http://NODE_ADDRESS:30080/api/info`.
+
+The Kubernetes Secret is base64-encoded, not encrypted, and exists only as a teaching example.
+
+Delete the Kubernetes resources and cluster when finished:
+
+```sh
+kubectl delete -f k8s/
+kind delete cluster --name devops-course
+```
+
 ## Ansible (Module 4)
 
 Run the mini labs from the `ansible/` directory:
