@@ -30,7 +30,7 @@ jobs:
         run: ./mvnw -B -ntp -DskipTests package
 
       - name: Upload the jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-jar
           path: target/devops-demo-1.0.0.jar
