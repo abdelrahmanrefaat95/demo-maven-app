@@ -170,3 +170,19 @@ Deploy another application version by overriding `app_version`:
 ```sh
 ansible-playbook site.yml --ask-vault-pass --tags deploy -e app_version=X.Y.Z
 ```
+
+## CI/CD (Module 7)
+
+The repository includes five GitHub Actions workflows:
+
+- `ci` runs on pull requests to `main`, pushes to `main`, and manual dispatches.
+- `deploy-k8s` runs on pushes to `main` that change `src/**`, `pom.xml`, or `Dockerfile`, and on manual dispatches.
+- `deploy-vm-ansible` runs only on manual dispatches.
+- `deploy-vm-runner` runs only on manual dispatches.
+- `runner-check` runs only on manual dispatches.
+
+Configure the repository variables `DOCKERHUB_USERNAME` and `APP_DEV_HOST`, and the repository secrets `DOCKERHUB_TOKEN` and `DB_PASSWORD`. Configure a `production` environment with a required reviewer and deployment restricted to `main`, plus a `dev` environment.
+
+The self-hosted control machine must have the `control` runner label and provides access to the Kubernetes cluster and the Ansible VM. The application development VM must have the `app-dev` runner label. The `deploy-k8s` workflow expects the `devops-demo` Deployment from Module 6 to already exist.
+
+The `Jenkinsfile` runs on an agent labelled `app-staging`. Deployment workflows never run on pull requests because self-hosted runners must not execute code from forks.

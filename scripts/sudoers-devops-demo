@@ -1,0 +1,4 @@
+# Install as /etc/sudoers.d/devops-demo (mode 0440), then check with: sudo visudo -cf /etc/sudoers.d/devops-demo
+# Lets the CI users run the deploy script as root, and nothing else.
+jenkins ALL=(root) NOPASSWD: /usr/local/bin/deploy-devops-demo.sh
+runner  ALL=(root) NOPASSWD: /usr/local/bin/deploy-devops-demo.sh
