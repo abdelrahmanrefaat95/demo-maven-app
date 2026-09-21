@@ -186,3 +186,24 @@ Configure the repository variables `DOCKERHUB_USERNAME` and `APP_DEV_HOST`, and 
 The self-hosted control machine must have the `control` runner label and provides access to the Kubernetes cluster and the Ansible VM. The application development VM must have the `app-dev` runner label. The `deploy-k8s` workflow expects the `devops-demo` Deployment from Module 6 to already exist.
 
 The `Jenkinsfile` runs on an agent labelled `app-staging`. Deployment workflows never run on pull requests because self-hosted runners must not execute code from forks.
+
+## Terraform (Bonus Module 8)
+
+Install Terraform and the AWS CLI, then configure the AWS CLI with a temporary lab user:
+
+```sh
+aws configure
+```
+
+Run either lab from `terraform/ec2` or `terraform/vpc`:
+
+```sh
+terraform init
+terraform fmt
+terraform validate
+terraform plan
+terraform apply
+terraform destroy
+```
+
+Always run `terraform destroy` after completing a lab to remove its AWS resources. Lab B keeps the NAT gateway disabled because NAT gateways are billed per hour.

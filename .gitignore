@@ -7,3 +7,7 @@ target/
 .env
 *.log
 ansible/vault/secrets.yml
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
