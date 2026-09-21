@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Make pipx tools visible to this job
         run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
