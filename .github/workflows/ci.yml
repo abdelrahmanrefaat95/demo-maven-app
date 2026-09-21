@@ -34,7 +34,7 @@ jobs:
         run: ./mvnw -B -ntp verify
 
       - name: Upload the jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-jar
           path: target/devops-demo-*.jar
