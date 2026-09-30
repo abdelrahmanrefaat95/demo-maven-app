@@ -1,0 +1,36 @@
+---
+- name: Prepare the server and deploy the application
+  hosts: app_servers
+  become: true
+  # The role groups reusable deployment details behind one readable entry.
+  roles:
+    - app
+
+- name: Verify the deployment
+  hosts: app_servers
+  gather_facts: false
+  tags: [verify, deploy]
+  # Variables are scoped to a play, so this play cannot read play 1's variables or role defaults and must declare the port again.
+  vars:
+    app_port: 8080
+  tasks:
+    # Waiting prevents a normal JVM startup delay from causing a false failure.
+    - name: Wait for the application port to open
+      ansible.builtin.wait_for:
+        port: "{{ app_port }}"
+        host: 127.0.0.1
+        delay: 5
+        timeout: 90
+
+    # The HTTP response proves the process answers through its real API.
+    - name: Ask the application what it is serving
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ app_port }}/api/info"
+      register: app_info
+
+    # A concise summary lets students confirm host, profile, and version quickly.
+    - name: Show the result
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} serves {{ app_info.json.environment }}
+          version {{ app_info.json.version }}

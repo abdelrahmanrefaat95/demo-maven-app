@@ -1,0 +1,3 @@
+app:
+  environment: dev
+  color: "#16a34a"

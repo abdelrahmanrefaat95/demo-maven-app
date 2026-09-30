@@ -1,0 +1,9 @@
+---
+# Defaults make deployment settings easy to override without editing the role.
+app_user: devops-demo
+app_home: /opt/devops-demo
+app_config_dir: /etc/devops-demo
+app_port: 8080
+app_version: "1.0.0"
+app_color: ""
+app_jar: "{{ playbook_dir }}/../target/devops-demo-{{ app_version }}.jar"

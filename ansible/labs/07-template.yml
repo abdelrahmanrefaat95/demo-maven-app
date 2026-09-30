@@ -1,0 +1,16 @@
+---
+- name: Lab 7 - templates
+  hosts: app_servers
+  become: true
+  # A variable makes one template reusable with a different message.
+  vars:
+    lab_banner: "Managed by Ansible - do not edit by hand"
+  tasks:
+    # Rendering combines fixed text with facts and inventory-specific values.
+    - name: Render the login banner
+      ansible.builtin.template:
+        src: templates/motd.j2
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: "0644"

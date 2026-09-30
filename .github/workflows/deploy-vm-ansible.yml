@@ -1,0 +1,44 @@
+name: deploy-vm-ansible
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-app-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy to app-dev with Ansible
+    runs-on: [self-hosted, control]
+    environment: dev
+    timeout-minutes: 15
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Make pipx tools visible to this job
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Build the jar
+        run: ./mvnw -B -ntp -DskipTests package
+
+      - name: Point the inventory at app-dev
+        run: sed -i "s/DEV_HOST_IP/${{ vars.APP_DEV_HOST }}/" ansible/inventory/hosts.yml
+
+      - name: Write the database password for this run
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          printf -- '---\nvault_db_password: "%s"\n' "$DB_PASSWORD" > ansible/vault/secrets.yml
+
+      - name: Run the playbook against dev
+        working-directory: ansible
+        run: ansible-playbook site.yml --limit dev
+
+      - name: Remove the password file
+        if: always()
+        run: rm -f ansible/vault/secrets.yml

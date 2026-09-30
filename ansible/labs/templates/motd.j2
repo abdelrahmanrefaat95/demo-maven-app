@@ -1,0 +1,10 @@
+{# A clear ownership warning discourages manual edits that automation would replace. #}
+{{ lab_banner }}
+{# Host and profile make it obvious which environment a student reached. #}
+Host: {{ inventory_hostname }} ({{ app_profile | upper }})
+{# Kernel data demonstrates that templates can consume gathered facts. #}
+Kernel: {{ ansible_facts['kernel'] }}
+{# The extra warning appears only where staging awareness matters. #}
+{% if app_profile == 'staging' %}
+This is a staging server.
+{% endif %}

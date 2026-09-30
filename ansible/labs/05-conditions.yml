@@ -1,0 +1,25 @@
+---
+- name: Lab 5 - conditions
+  hosts: app_servers
+  become: true
+  tasks:
+    # OS checks keep platform-specific work away from incompatible systems.
+    - name: Report a Debian-family host
+      ansible.builtin.debug:
+        msg: "This host belongs to the Debian family"
+      when: ansible_facts['os_family'] == 'Debian'
+    # Profile checks let one play produce different behavior per environment.
+    - name: Report a staging host
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} is a staging host"
+      when: app_profile == 'staging'
+    # Combining a loop and condition applies repeated work only where needed.
+    - name: Create staging directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - /srv/lab/staging/logs
+        - /srv/lab/staging/data
+      when: app_profile == 'staging'

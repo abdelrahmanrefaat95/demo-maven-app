@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+[Unit]
+{# Network readiness is required before this web application starts. #}
+Description=DevOps demo Spring Boot app
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists={{ app_home }}/app.jar
+
+[Service]
+{# The dedicated account prevents the application from running as root. #}
+User={{ app_user }}
+Group={{ app_user }}
+{# Relative paths and generated files stay anchored in the application directory. #}
+WorkingDirectory={{ app_home }}
+{# Deployment-specific settings remain outside the reusable jar. #}
+EnvironmentFile={{ app_config_dir }}/app.env
+{# The same stable path can receive a new artifact on every deployment. #}
+ExecStart=/usr/bin/java -jar {{ app_home }}/app.jar
+SuccessExitStatus=143
+Restart=on-failure
+
+[Install]
+{# Joining the normal multi-user boot target makes enablement persistent. #}
+WantedBy=multi-user.target

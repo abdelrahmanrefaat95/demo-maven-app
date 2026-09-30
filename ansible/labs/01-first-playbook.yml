@@ -1,0 +1,15 @@
+---
+- name: Lab 1 - a first playbook
+  hosts: app_servers
+  tasks:
+    # Seeing the inventory name connects play output to the selected machine.
+    - name: Show the inventory host name
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}"
+
+    # A stable file demonstrates changed once and ok on the second run.
+    - name: Create a hello file
+      ansible.builtin.copy:
+        content: "Hello from Ansible\n"
+        dest: /tmp/hello.txt
+        mode: "0644"

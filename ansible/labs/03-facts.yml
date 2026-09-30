@@ -1,0 +1,20 @@
+---
+- name: Lab 3 - facts
+  hosts: app_servers
+  tasks:
+    # Distribution identity helps choose compatible packages and commands.
+    - name: Show the distribution
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts['distribution'] }}"
+    # The version explains why otherwise similar hosts can behave differently.
+    - name: Show the distribution version
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts['distribution_version'] }}"
+    # Available memory is a common input when sizing an application.
+    - name: Show the total memory
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts['memtotal_mb'] }}"
+    # The discovered address shows facts can describe networking too.
+    - name: Show the default IPv4 address
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts['default_ipv4']['address'] }}"

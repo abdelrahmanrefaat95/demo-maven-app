@@ -1,0 +1,39 @@
+---
+- name: Mini lab 3 - variables, loops, and conditions
+  hosts: app_servers
+  become: true
+  vars:
+    lab_tools:
+      - tree
+      - jq
+    lab_dirs:
+      - /srv/lab/logs
+      - /srv/lab/data
+  tasks:
+    - name: Show the group variable for this host
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} uses profile {{ app_profile }}"
+
+    - name: Install small tools on Debian-family hosts
+      ansible.builtin.apt:
+        name: "{{ lab_tools }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Create lab directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ lab_dirs }}"
+
+    - name: Check memory
+      ansible.builtin.command: free -m
+      register: lab_mem
+      changed_when: false
+
+    - name: Show the memory line
+      ansible.builtin.debug:
+        var: lab_mem.stdout_lines[1]

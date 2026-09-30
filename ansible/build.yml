@@ -1,0 +1,41 @@
+---
+- name: Build the application on the control node
+  # The source checkout lives on the control node, so no managed host is targeted.
+  hosts: localhost
+  # A local connection runs Maven directly instead of making an SSH round trip.
+  connection: local
+  # No facts are needed, and gathering them would add an unnecessary round trip.
+  gather_facts: false
+  # Matching the deploy version gives both playbooks the same artifact name.
+  vars:
+    app_version: "1.0.0"
+    # The dirname filter gives the repository root as a clean absolute path.
+    repo_dir: "{{ playbook_dir | dirname }}"
+  tasks:
+    # The wrapper uses the course's pinned Maven version to create the deployable jar.
+    - name: Build the jar with the Maven wrapper
+      ansible.builtin.command:
+        cmd: ./mvnw clean package
+        chdir: "{{ repo_dir }}"
+      # A build always does work, so this deliberately non-idempotent playbook must report a change.
+      changed_when: true
+
+    # Inspecting the result proves the artifact the deploy will ship came from this build.
+    - name: Confirm the artifact exists
+      ansible.builtin.stat:
+        path: "{{ repo_dir }}/target/devops-demo-{{ app_version }}.jar"
+      register: app_jar_built
+
+    # Showing its path and size makes the build-to-deploy handoff visible to students.
+    - name: Report the artifact
+      ansible.builtin.debug:
+        msg: "Built {{ app_jar_built.stat.path }} ({{ app_jar_built.stat.size }} bytes)"
+      when: app_jar_built.stat.exists
+
+    # A clear warning explains how to align the build when the expected version differs.
+    - name: Warn if the expected artifact is missing
+      ansible.builtin.debug:
+        msg: >-
+          No jar at {{ app_jar_built.stat.path }}. Pass the same -e app_version
+          to build.yml and deploy.yml.
+      when: not app_jar_built.stat.exists

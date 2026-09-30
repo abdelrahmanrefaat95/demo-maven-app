@@ -1,0 +1,22 @@
+---
+- name: Lab 8 - handlers
+  hosts: app_servers
+  become: true
+  # A variable lets an extra value trigger a meaningful template change.
+  vars:
+    lab_banner: "Managed by Ansible - do not edit by hand"
+  tasks:
+    # Notification ties follow-up work to an actual content change.
+    - name: Render the login banner
+      ansible.builtin.template:
+        src: templates/motd.j2
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Announce the change
+  handlers:
+    # Running only after change demonstrates deferred, event-driven work.
+    - name: Announce the change
+      ansible.builtin.debug:
+        msg: "The banner changed on {{ inventory_hostname }}"

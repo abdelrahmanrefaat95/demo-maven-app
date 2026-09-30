@@ -1,0 +1,3 @@
+app:
+  environment: staging
+  color: "#f59e0b"

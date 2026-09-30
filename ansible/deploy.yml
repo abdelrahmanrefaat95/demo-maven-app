@@ -1,0 +1,127 @@
+---
+- name: Prepare the server and deploy the application
+  hosts: app_servers
+  become: true
+  # Keeping deployment settings together makes classroom overrides easy to see.
+  vars:
+    app_user: devops-demo
+    app_home: /opt/devops-demo
+    app_config_dir: /etc/devops-demo
+    app_port: 8080
+    app_version: "1.0.0"
+    app_color: ""
+    app_jar: "{{ playbook_dir }}/../target/devops-demo-{{ app_version }}.jar"
+  tasks:
+    # The app is a Java 17 jar, so the JRE must exist before we copy it.
+    - name: Install the Java runtime
+      ansible.builtin.apt:
+        name: openjdk-17-jre-headless
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+      tags: prepare
+
+    # A dedicated account limits the permissions available to the running app.
+    - name: Create the application user
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+      tags: prepare
+
+    # Predictable writable locations keep application files out of personal homes.
+    - name: Create the application directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0755"
+      loop:
+        - "{{ app_home }}"
+        - "{{ app_config_dir }}"
+      tags: prepare
+
+    # Host-specific profiles and ports belong in configuration, not in the jar.
+    - name: Render the environment file
+      ansible.builtin.template:
+        src: templates/app.env.j2
+        dest: "{{ app_config_dir }}/app.env"
+        owner: root
+        group: root
+        mode: "0640"
+      notify: Restart the application
+      tags: prepare
+
+    # systemd needs a unit definition before it can manage the app lifecycle.
+    - name: Install the systemd unit file
+      ansible.builtin.template:
+        src: templates/devops-demo.service.j2
+        dest: /etc/systemd/system/devops-demo.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart the application
+      tags: prepare
+
+    # Enabling the unit makes the application return after a server reboot.
+    - name: Enable the service at boot
+      ansible.builtin.systemd_service:
+        name: devops-demo
+        enabled: true
+        daemon_reload: true
+      tags: prepare
+
+    # Copying the built artifact makes the requested version available to run.
+    - name: Copy the application jar to the server
+      ansible.builtin.copy:
+        src: "{{ app_jar }}"
+        dest: "{{ app_home }}/app.jar"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0644"
+      notify: Restart the application
+      tags: deploy
+
+    # Starting after the copy provides a working service on a first deployment.
+    - name: Make sure the service is running
+      ansible.builtin.systemd_service:
+        name: devops-demo
+        state: started
+      tags: deploy
+  handlers:
+    # Configuration or artifact changes take effect only after a process restart.
+    - name: Restart the application
+      ansible.builtin.systemd_service:
+        name: devops-demo
+        state: restarted
+
+- name: Verify the deployment
+  hosts: app_servers
+  gather_facts: false
+  tags: [verify, deploy]
+  # Variables are scoped to a play, so this play cannot read play 1's variables or role defaults and must declare the port again.
+  vars:
+    app_port: 8080
+  tasks:
+    # Waiting prevents a normal JVM startup delay from causing a false failure.
+    - name: Wait for the application port to open
+      ansible.builtin.wait_for:
+        port: "{{ app_port }}"
+        host: 127.0.0.1
+        delay: 5
+        timeout: 90
+
+    # The HTTP response proves the process answers through its real API.
+    - name: Ask the application what it is serving
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ app_port }}/api/info"
+      register: app_info
+
+    # A concise summary lets students confirm host, profile, and version quickly.
+    - name: Show the result
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} serves {{ app_info.json.environment }}
+          version {{ app_info.json.version }}

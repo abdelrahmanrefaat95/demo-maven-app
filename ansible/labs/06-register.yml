@@ -1,0 +1,18 @@
+---
+- name: Lab 6 - register and debug
+  hosts: app_servers
+  tasks:
+    # Capturing command output makes it available to later tasks as structured data.
+    - name: Read the memory report
+      ansible.builtin.command:
+        cmd: free -m
+      register: memory_report
+      changed_when: false
+    # The complete result reveals the fields Ansible records around a command.
+    - name: Show the registered result
+      ansible.builtin.debug:
+        var: memory_report
+    # Selecting one field demonstrates how later tasks use only relevant data.
+    - name: Show the useful output lines
+      ansible.builtin.debug:
+        var: memory_report.stdout_lines

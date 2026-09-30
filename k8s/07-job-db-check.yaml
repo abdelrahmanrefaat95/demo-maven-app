@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-check
+  namespace: devops-demo
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: psql
+          image: postgres:17
+          command:
+            - sh
+            - -c
+            - 'psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "select count(*) as items from items;"'
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: DB_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: app-config

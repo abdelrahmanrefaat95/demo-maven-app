@@ -1,0 +1,19 @@
+name: runner-check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  whoami:
+    name: who is running this job
+    runs-on: [self-hosted, control]
+    steps:
+      - name: Describe the runner machine
+        run: |
+          echo "Host: $(hostname)"
+          echo "User: $(whoami)"
+          docker ps --format '{{.Names}}' | head -5
+          kubectl get nodes

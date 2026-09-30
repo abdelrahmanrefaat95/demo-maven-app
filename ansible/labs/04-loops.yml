@@ -1,0 +1,24 @@
+---
+- name: Lab 4 - loops
+  hosts: app_servers
+  become: true
+  tasks:
+    # Repeating one package rule avoids duplicating identical installation logic.
+    - name: Install the lab tools
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+      loop:
+        - tree
+        - jq
+    # Repeating one directory rule keeps permissions consistent across paths.
+    - name: Create the lab directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - /srv/lab/logs
+        - /srv/lab/data

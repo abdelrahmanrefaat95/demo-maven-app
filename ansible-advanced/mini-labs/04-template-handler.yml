@@ -1,0 +1,19 @@
+---
+- name: Mini lab 4 - templates and handlers
+  hosts: app_servers
+  become: true
+  vars:
+    lab_banner: "Managed by Ansible - do not edit by hand"
+  tasks:
+    - name: Render the login banner
+      ansible.builtin.template:
+        src: templates/motd.j2
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Announce banner change
+  handlers:
+    - name: Announce banner change
+      ansible.builtin.debug:
+        msg: "The banner changed on {{ inventory_hostname }}"

@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-check-hourly
+  namespace: devops-demo
+spec:
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: psql
+              image: postgres:17
+              command:
+                - sh
+                - -c
+                - 'psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "select count(*) from items;"'
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secret
+                      key: DB_PASSWORD
+              envFrom:
+                - configMapRef:
+                    name: app-config

@@ -1,0 +1,6 @@
+---
+# Configuration or artifact changes take effect only after a process restart.
+- name: Restart the application
+  ansible.builtin.systemd_service:
+    name: devops-demo
+    state: restarted

@@ -1,0 +1,22 @@
+---
+- name: Lab 9 - clean up the lab files
+  hosts: app_servers
+  become: true
+  tasks:
+    # Removing every generated path returns hosts to their pre-lab state.
+    - name: Remove the lab files and directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/hello.txt
+        - /srv/lab
+        - /etc/motd
+    # Removing teaching-only packages keeps the managed nodes minimal afterward.
+    - name: Remove the lab tools
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - tree
+        - jq

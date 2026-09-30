@@ -1,0 +1,22 @@
+---
+- name: Lab 2 - where variables come from
+  hosts: app_servers
+  # Play-level values show data that belongs to this particular automation.
+  vars:
+    app_owner: "platform-team"
+    app_port: 8080
+  tasks:
+    # Reading a play value demonstrates the closest visible variable source.
+    - name: Show a play variable
+      ansible.builtin.debug:
+        msg: "The application owner is {{ app_owner }} on port {{ app_port }}"
+
+    # Reading the profile connects each host to its inline inventory data.
+    - name: Show an inventory variable
+      ansible.builtin.debug:
+        msg: "{{ app_profile }}"
+
+    # A safe default lets students compare runs with and without -e.
+    - name: Show an extra variable
+      ansible.builtin.debug:
+        msg: "{{ release_note | default('not supplied') }}"

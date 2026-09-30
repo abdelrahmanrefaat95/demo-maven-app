@@ -1,0 +1,21 @@
+---
+# One group lets the deployment address both application environments together.
+app_servers:
+  # Keeping the host map here defines direct members without extra hierarchy.
+  hosts:
+    # A stable development name keeps commands independent of changing addresses.
+    app-dev:
+      # ansible_host tells Ansible which real address belongs to this alias.
+      ansible_host: DEV_HOST_IP
+      # app_profile is a user-defined variable that the playbook reads.
+      app_profile: dev
+    # A separate staging name makes environment-specific runs easy to target.
+    app-staging:
+      # ansible_host tells Ansible which real address belongs to this alias.
+      ansible_host: STAGING_HOST_IP
+      # app_profile is a user-defined variable that the playbook reads.
+      app_profile: staging
+  # vars is a sibling of hosts and applies these values to every host in the group.
+  vars:
+    # A shared SSH account gives both managed nodes the same connection identity.
+    ansible_user: ubuntu

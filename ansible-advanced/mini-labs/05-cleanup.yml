@@ -1,0 +1,13 @@
+---
+- name: Mini lab cleanup
+  hosts: app_servers
+  become: true
+  tasks:
+    - name: Remove mini lab files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/hello.txt
+        - /srv/lab
+        - /etc/motd
