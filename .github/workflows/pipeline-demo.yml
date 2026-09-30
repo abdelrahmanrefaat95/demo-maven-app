@@ -1,0 +1,73 @@
+name: pipeline-demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "pom.xml"
+      - "Dockerfile"
+      - "k8s/simple/**"
+      - ".github/workflows/pipeline-demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pipeline-demo
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build and push image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      image: ${{ steps.image.outputs.ref }}
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Work out the image name
+        id: image
+        run: echo "ref=docker.io/${{ vars.DOCKERHUB_USERNAME }}/devops-demo:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.image.outputs.ref }}
+
+  deploy:
+    name: deploy to kubernetes
+    needs: build
+    runs-on: [self-hosted, demo]
+    timeout-minutes: 10
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Show which cluster we are talking to
+        run: kubectl config current-context
+
+      - name: Apply the manifests with this run's image
+        run: |
+          sed "s|IMAGE_PLACEHOLDER|${{ needs.build.outputs.image }}|" k8s/simple/app.yaml \
+            | kubectl apply -f -
+
+      - name: Wait for the rollout
+        run: kubectl -n demo rollout status deployment/devops-demo --timeout=300s
+
+      - name: Smoke test
+        run: curl -fsS http://localhost:30080/api/info

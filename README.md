@@ -207,3 +207,10 @@ terraform destroy
 ```
 
 Always run `terraform destroy` after completing a lab to remove its AWS resources. Lab B keeps the NAT gateway disabled because NAT gateways are billed per hour.
+
+## Two-hour CI/CD session (pipeline-demo)
+
+`pipeline-demo.yml` builds and pushes the image on GitHub-hosted runners and deploys it from a self-hosted runner carrying the label `demo`.
+It needs the repository variable `DOCKERHUB_USERNAME` and the repository secret `DOCKERHUB_TOKEN`.
+`k8s/simple/app.yaml` is a self-contained namespace + Deployment + NodePort service whose image is substituted at deploy time in place of `IMAGE_PLACEHOLDER`.
+`k8s/simple/kind-demo.yaml` creates a one-node kind cluster with host port 30080 mapped.
